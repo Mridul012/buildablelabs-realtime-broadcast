@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+backend/.env
+mobile/.env
+n8n-workflows/credentials/*.json
+
+# Backend
+backend/dist/
+backend/build/
+
+# Prisma
+backend/prisma/*.db
+
+# Mobile / Expo
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/web-build/
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.key
+mobile/*.mobileprovision
+mobile/ios/
+mobile/android/
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
