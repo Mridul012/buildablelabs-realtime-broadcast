@@ -1,7 +1,8 @@
 # BuildableLabs Real-Time Broadcast Platform
 
-A full-stack real-time live broadcasting platform.
-The platform enables creators to start live broadcasts, viewers to join and watch in real time, chat during the stream, and trigger automated workflows using n8n.
+A full-stack real-time live broadcasting platform built with React Native, Node.js, LiveKit, Socket.io, PostgreSQL, Prisma, and n8n.
+
+The platform enables creators to start live broadcasts, viewers to join and watch in real time, chat during streams, and trigger automated workflows.
 
 ---
 
@@ -12,8 +13,8 @@ The platform enables creators to start live broadcasts, viewers to join and watc
 ### Creator
 - Start a live stream
 - Publish live video and audio using LiveKit
-- View live viewer count
-- Read and send chat messages
+- View the live viewer count
+- Send and receive chat messages
 - End the live stream
 
 ### Viewer
@@ -24,11 +25,12 @@ The platform enables creators to start live broadcasts, viewers to join and watc
 - View live viewer count updates
 
 ### Real-Time Features
-- LiveKit video/audio streaming
-- Socket.io powered real-time chat
+- LiveKit-powered video and audio streaming
+- Socket.io real-time chat
 - Live viewer count synchronization
-- Stream lifecycle management
+- Complete stream lifecycle management
 
+---
 
 ## Phase 3 — Automation (n8n)
 
@@ -79,8 +81,6 @@ buildablelabs-realtime-broadcast/
 │
 ├── n8n-workflows/
 │
-├── docs/
-│
 └── README.md
 ```
 
@@ -88,31 +88,29 @@ buildablelabs-realtime-broadcast/
 
 # Architecture Overview
 
+```text
+              Creator App
+                    │
+                    │
+             LiveKit Cloud
+                    │
+                    │
+              Viewer App
+
+                    │
+                    ▼
+
+         Express + Socket.io API
+                    │
+                    ▼
+
+      PostgreSQL Database (Prisma)
+
+                    │
+                    ▼
+
+            n8n Automation
 ```
-                Creator App
-                     │
-                     │
-              LiveKit Cloud
-                     │
-                     │
-               Viewer App
-
-                     │
-                     ▼
-
-          Express + Socket.io API
-                     │
-                     ▼
-
-        PostgreSQL Database (Prisma)
-
-                     │
-                     ▼
-
-             n8n Automation
-```
-
-Detailed architecture and diagrams are available inside the **docs/** directory.
 
 ---
 
@@ -123,7 +121,7 @@ Detailed architecture and diagrams are available inside the **docs/** directory.
 - Node.js 20+
 - npm
 - PostgreSQL (or Neon PostgreSQL)
-- LiveKit Cloud Project
+- LiveKit Cloud project
 - n8n
 - Expo SDK
 - Xcode (for iOS development)
@@ -153,13 +151,13 @@ N8N_VIEWER_MILESTONE_WEBHOOK_URL=
 N8N_STREAM_ENDED_WEBHOOK_URL=
 ```
 
-Run the backend:
+Run the development server:
 
 ```bash
 npm run dev
 ```
 
-Build:
+Build the project:
 
 ```bash
 npm run build
@@ -181,29 +179,28 @@ EXPO_PUBLIC_API_URL=
 EXPO_PUBLIC_SOCKET_URL=
 ```
 
-Run:
+Generate the native project:
 
 ```bash
 npx expo prebuild
 ```
 
+Run on iOS:
+
 ```bash
 npx expo run:ios
 ```
+
+> **Note:** Since the project uses LiveKit and react-native-webrtc, it requires an Expo Development Build and will not run in Expo Go.
 
 ---
 
 # n8n Setup
 
-1. Start n8n.
-2. Import all workflow JSON files from:
-
-```
-n8n-workflows/
-```
-
-3. Configure PostgreSQL and webhook credentials.
-4. Update the webhook URLs inside the backend `.env`.
+1. Start an n8n instance.
+2. Import the workflow JSON files from the `n8n-workflows/` directory.
+3. Configure the PostgreSQL and webhook credentials.
+4. Update the webhook URLs in the backend `.env` file.
 
 ---
 
@@ -212,29 +209,23 @@ n8n-workflows/
 - Live video broadcasting
 - Live audio broadcasting
 - Real-time chat
-- Live viewer count
+- Live viewer count synchronization
 - Stream discovery
 - Automated notifications
 - Daily analytics workflow
 
-
 ---
-
 
 # Repository Contents
 
 | Folder | Description |
 |---------|-------------|
-| backend | Express backend and REST APIs |
-| mobile | React Native application |
-| n8n-workflows | Exported automation workflows |
-| docs | Architecture diagrams and documentation |
+| backend | Express backend, REST APIs, Socket.io server and Prisma integration |
+| mobile | React Native (Expo) application |
+| n8n-workflows | Exported n8n automation workflows |
 
 ---
-
-
 
 # Author
 
 **Mridul**
-
