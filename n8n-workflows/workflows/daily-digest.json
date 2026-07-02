@@ -1,0 +1,153 @@
+{
+  "name": "Daily Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "4d4e2f10-0004-4000-8000-000000000001",
+      "name": "Every Day 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-700, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT s.title, u.username AS creator, s.\"viewerCount\", ROUND(EXTRACT(EPOCH FROM (s.\"endedAt\" - s.\"startedAt\"))/60) AS duration FROM \"Stream\" s JOIN \"User\" u ON u.id = s.\"creatorId\" WHERE s.\"startedAt\" >= NOW() - INTERVAL '24 hours' ORDER BY s.\"viewerCount\" DESC LIMIT 5;",
+        "options": {}
+      },
+      "id": "4d4e2f10-0004-4000-8000-000000000002",
+      "name": "Get Top Streams",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-470, 0],
+      "credentials": {
+        "postgres": {
+          "id": "neon-postgres",
+          "name": "Neon (buildablelabs)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "title"
+            },
+            {
+              "fieldToAggregate": "creator"
+            },
+            {
+              "fieldToAggregate": "viewerCount"
+            },
+            {
+              "fieldToAggregate": "duration"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d4e2f10-0004-4000-8000-000000000003",
+      "name": "Collect Rows",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [-220, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "digest",
+              "name": "digest",
+              "type": "string",
+              "value": "={{ '📊 Daily Stream Digest\\n\\n' + $json.title.map((title, i) => `🏆 ${i + 1}. ${title}\\n👤 ${$json.creator[i]}\\n👥 ${$json.viewerCount[i]} viewers\\n⏱️ ${$json.duration[i]} mins`).join('\\n\\n') + '\\n\\n🤖 Generated automatically by n8n' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d4e2f10-0004-4000-8000-000000000004",
+      "name": "Format Digest",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [70, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_DISCORD_WEBHOOK_URL",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"content\": $json.digest } }}"
+      },
+      "id": "4d4e2f10-0004-4000-8000-000000000005",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [350, 0]
+    }
+  ],
+  "connections": {
+    "Every Day 9AM": {
+      "main": [
+        [
+          {
+            "node": "Get Top Streams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Top Streams": {
+      "main": [
+        [
+          {
+            "node": "Collect Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Rows": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Digest": {
+      "main": [
+        [
+          {
+            "node": "Send Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

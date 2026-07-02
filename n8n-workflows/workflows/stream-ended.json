@@ -1,0 +1,130 @@
+{
+  "name": "Stream Ended",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "stream-ended",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "3c3e2f10-0003-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-400, 0],
+      "webhookId": "stream-ended"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "streamId",
+              "type": "string",
+              "value": "={{ $json.body.streamId }}"
+            },
+            {
+              "id": "a2",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.body.title }}"
+            },
+            {
+              "id": "a3",
+              "name": "durationMinutes",
+              "type": "number",
+              "value": "={{ Math.round((new Date($json.body.endedAt).getTime() - new Date($json.body.startedAt).getTime()) / 60000) }}"
+            },
+            {
+              "id": "a4",
+              "name": "finalViewerCount",
+              "type": "number",
+              "value": "={{ $json.body.finalViewerCount }}"
+            },
+            {
+              "id": "a5",
+              "name": "summary",
+              "type": "string",
+              "value": "={{ '📺 \"' + $json.body.title + '\" ended after ' + Math.round((new Date($json.body.endedAt).getTime() - new Date($json.body.startedAt).getTime()) / 60000) + ' min with ' + $json.body.finalViewerCount + ' viewers.' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3c3e2f10-0003-4000-8000-000000000002",
+      "name": "Generate Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-180, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_DISCORD_WEBHOOK_URL",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"content\": $json.summary } }}"
+      },
+      "id": "3c3e2f10-0003-4000-8000-000000000004",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [40, -120]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"summary\": $json.summary, \"streamId\": $json.streamId, \"durationMinutes\": $json.durationMinutes, \"finalViewerCount\": $json.finalViewerCount } }}",
+        "options": {}
+      },
+      "id": "3c3e2f10-0003-4000-8000-000000000003",
+      "name": "Return Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.3,
+      "position": [280, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Summary": {
+      "main": [
+        [
+          {
+            "node": "Send Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Notification": {
+      "main": [
+        [
+          {
+            "node": "Return Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
